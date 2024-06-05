@@ -36,7 +36,7 @@ def lambda_handler(event, context):
 
           print("Difference in Days : ", date_difference)
 
-          if date_difference > 1:
+          if date_difference.days > 1:
              airbnb_df = pd.DataFrame(actual_message)
              csv_buffer = io.StringIO()
              airbnb_df.to_csv(csv_buffer, index = False)
