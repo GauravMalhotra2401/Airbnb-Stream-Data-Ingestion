@@ -40,7 +40,7 @@ def lambda_handler(event, context):
              airbnb_df = pd.DataFrame([actual_message], index = [0])
              csv_buffer = io.StringIO()
              airbnb_df.to_csv(csv_buffer, index = False)
-             s3_client.append_object(Bucket = s3_upload_bucket, Key = s3_upload_object_key, Body = csv_buffer.getvalue())
+             s3_client.put_object(Bucket = s3_upload_bucket, Key = s3_upload_object_key, Body = csv_buffer.getvalue())
 
              sns_client.publish(
                 Subject = f"Luxurious AIRBNB Spotted",
