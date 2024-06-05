@@ -25,11 +25,10 @@ def lambda_handler(event, context):
 
     print("response is : ", response)
 
-    if "Messages" in response:
-       messages = response.get("Messages", [])
+    if "Records" in event:
 
-       for message in messages:
-          actual_message = json.loads(message['Body'])
+       for message in event['Records']:
+          actual_message = json.loads(message['body'])
           startDate = datetime.strptime(actual_message['startDate'], "%Y-%m-%d")
           endDate = datetime.strptime(actual_message['endDate'], "%Y-%m-%d")
 
@@ -49,7 +48,7 @@ def lambda_handler(event, context):
                 Message = (
                   "One of our Guest stayed at our property situated in " + actual_message['location'] +
                   " and was so mesmerized by the view that they couldn't resist themselves and stayed for a total of " +
-                  str(date_difference) + " days.\n" +
+                  str(date_difference.days) + " days.\n" +
                   "Whenever planning your next trip, consider this as your first priority.\n" +
                   "Refer to the property details for future reference:\n" +
                   "Property ID: " + actual_message['propertyId'] + ", " +
