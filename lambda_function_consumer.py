@@ -23,6 +23,8 @@ def lambda_handler(event, context):
         WaitTimeSeconds = 1
     )
 
+    print("response is : ", response)
+
     if "Messages" in response:
        messages = response.get("Messages", [])
 
