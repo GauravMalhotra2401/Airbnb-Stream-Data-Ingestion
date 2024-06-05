@@ -1,0 +1,38 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing dependencies..."
+      - pip install -r requirements.txt -t lib
+
+  build:
+    commands:
+      - echo "Zipping producer deployment package..."
+      - cp lambda_function_producer.py lib/
+      - cd lib
+      - zip -r9 ../producer_deployment_package.zip .
+      - cd ..
+      - echo "Zipping consumer deployment package..."
+      - cp lambda_function_consumer.py lib/
+      - cd lib
+      - zip -r9 ../consumer_deployment_package.zip .
+      - cd ..
+
+  post_build:
+    commands:
+      - echo "Uploading producer deployment package to S3..."
+      - aws s3 cp producer_deployment_package.zip s3://airbnb-records-booking/
+      - echo "Uploading consumer deployment package to S3..."
+      - aws s3 cp consumer_deployment_package.zip s3://airbnb-records-booking/
+      - echo "Updating producer Lambda function via S3..."
+      - aws lambda update-function-code --function-name ProduceAirbnbBookingData --s3-bucket airbnb-records-booking --s3-key producer_deployment_package.zip 
+      - echo "Updating consumer Lambda function via S3..."
+      - aws lambda update-function-code --function-name ProcessFilteredBookings --s3-bucket airbnb-records-booking --s3-key consumer_deployment_package.zip 
+      - echo "Deployment complete!"
+
+artifacts:
+  files:
+    - producer_deployment_package.zip
+    - consumer_deployment_package.zip
