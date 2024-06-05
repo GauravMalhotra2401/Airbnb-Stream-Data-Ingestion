@@ -19,8 +19,8 @@ def lambda_handler(event, context):
 
     response = sqs_client.receive_message(
         QueueUrl = sqs_queue_url,
-        MaxNumberOfMessages = 1,
-        WaitTimeSeconds = 1
+        MaxNumberOfMessages = 10,
+        WaitTimeSeconds = 10
     )
 
     print("response is : ", response)
