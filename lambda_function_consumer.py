@@ -25,10 +25,10 @@ def lambda_handler(event, context):
 
     print("response is : ", response)
 
-    if "Records" in event:
+    if "Messages" in response:
 
-       for message in event['Records']:
-          actual_message = json.loads(message['body'])
+       for message in response['Messages']:
+          actual_message = json.loads(message['Body'])
           startDate = datetime.strptime(actual_message['startDate'], "%Y-%m-%d")
           endDate = datetime.strptime(actual_message['endDate'], "%Y-%m-%d")
 
