@@ -37,7 +37,7 @@ def lambda_handler(event, context):
           print("Difference in Days : ", date_difference)
 
           if date_difference.days > 1:
-             airbnb_df = pd.DataFrame(actual_message)
+             airbnb_df = pd.DataFrame([actual_message], index = [0])
              csv_buffer = io.StringIO()
              airbnb_df.to_csv(csv_buffer, index = False)
              s3_client.put_object(Bucket = s3_upload_bucket, Key = s3_upload_object_key, Body = csv_buffer.getvalue())
