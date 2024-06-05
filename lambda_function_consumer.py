@@ -40,7 +40,7 @@ def lambda_handler(event, context):
              airbnb_df = pd.DataFrame([actual_message], index = [0])
              csv_buffer = io.StringIO()
              airbnb_df.to_csv(csv_buffer, index = False)
-             s3_client.put_object(Bucket = s3_upload_bucket, Key = s3_upload_object_key, Body = csv_buffer.getvalue())
+             s3_client.append_object(Bucket = s3_upload_bucket, Key = s3_upload_object_key, Body = csv_buffer.getvalue())
 
              sns_client.publish(
                 Subject = f"Luxurious AIRBNB Spotted",
@@ -48,10 +48,10 @@ def lambda_handler(event, context):
                 Message = (
                   "One of our Guest stayed at our property situated in " + str(actual_message['location']) +
                   " and was so mesmerized by the view that they couldn't resist themselves and stayed for a total of " +
-                  str(date_difference.days) + " days.\n" +
-                  "Whenever planning your next trip, consider this as your first priority.\n" +
+                  str(date_difference.days) + " days.\n\n" +
+                  "Whenever planning your next trip, consider this property as your first priority.\n" +
                   "Refer to the property details for future reference:\n" +
-                  "Property ID: " + str(actual_message['propertyId']) + ", " +
+                  "Property ID: " + str(actual_message['propertyId']) + '\n' +
                   "Location: " + str(actual_message['location'])
                   ),
                 MessageStructure = "text"
