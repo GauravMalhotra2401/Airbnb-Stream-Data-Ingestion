@@ -26,7 +26,7 @@ def lambda_handler(event, context):
     print("response is : ", response)
 
     if "Messages" in response:
-
+       new_records = []
        for message in response['Messages']:
           actual_message = json.loads(message['Body'])
           startDate = datetime.strptime(actual_message['startDate'], "%Y-%m-%d")
@@ -37,10 +37,7 @@ def lambda_handler(event, context):
           print("Difference in Days : ", date_difference)
 
           if date_difference.days > 1:
-             airbnb_df = pd.DataFrame([actual_message], index = [0])
-             csv_buffer = io.StringIO()
-             airbnb_df.to_csv(csv_buffer, index = False)
-             s3_client.put_object(Bucket = s3_upload_bucket, Key = s3_upload_object_key, Body = csv_buffer.getvalue())
+             new_records.append(actual_message)
 
              sns_client.publish(
                 Subject = f"Luxurious AIRBNB Spotted",
@@ -58,21 +55,34 @@ def lambda_handler(event, context):
                )
           else:
              print("User didn't stayed for more than a day.")
-          
-    
-    else:
-       print("No messages received")
 
-    try:
-       receipt_handle = response['ReceiptHandle']
-       sqs_client.delete_message(
-          QueueUrl = sqs_queue_url,
-          ReceiptHandle = receipt_handle
-       )
-       print("Message deleted successfully")
+       try:
+            receipt_handle = response['ReceiptHandle']
+            sqs_client.delete_message(
+            QueueUrl = sqs_queue_url,
+            ReceiptHandle = receipt_handle
+            )
+            print("Message deleted successfully")
 
-    except Exception as err:
-       print(f"Error deleting message: {err}")
+            if new_records:
+               new_data = pd.DataFrame(new_records)
+               try:
+                  s3_object = s3_client.get_object(Bucket=s3_upload_bucket, Key=s3_upload_object_key)
+                  existing_data = pd.read_csv(io.BytesIO(s3_object['Body'].read()))
+                  updated_data = pd.concat([existing_data, new_data], ignore_index=True)
+               
+               except s3_client.exceptions.NoSuchKey:
+                  updated_data = new_data
+
+               csv_buffer = io.StringIO()
+               updated_data.to_csv(csv_buffer, index=False)
+               s3_client.put_object(Bucket=s3_upload_bucket, Key=s3_upload_object_key, Body=csv_buffer.getvalue())
+
+       except Exception as err:
+            print(f"Error deleting message: {err}")
+               
+       else:
+         print("No messages received")
 
     return {
        "statusCode":200,
