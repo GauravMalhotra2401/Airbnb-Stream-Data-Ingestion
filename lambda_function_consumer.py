@@ -62,9 +62,13 @@ def lambda_handler(event, context):
             QueueUrl = sqs_queue_url,
             ReceiptHandle = receipt_handle
             )
+      
             print("Message deleted successfully")
+       except Exception as err:
+            print(f"Error deleting message: {err}")
+            
 
-            if new_records:
+       if new_records:
                new_data = pd.DataFrame(new_records)
                try:
                   s3_object = s3_client.get_object(Bucket=s3_upload_bucket, Key=s3_upload_object_key)
@@ -77,9 +81,6 @@ def lambda_handler(event, context):
                csv_buffer = io.StringIO()
                updated_data.to_csv(csv_buffer, index=False)
                s3_client.put_object(Bucket=s3_upload_bucket, Key=s3_upload_object_key, Body=csv_buffer.getvalue())
-
-       except Exception as err:
-            print(f"Error deleting message: {err}")
                
        else:
          print("No messages received")
