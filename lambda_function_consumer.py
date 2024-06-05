@@ -44,11 +44,15 @@ def lambda_handler(event, context):
              sns_client.publish(
                 Subject = f"Luxurious AIRBNB Spotted",
                 TopicArn = sns_arn,
-                Message = f"One of our Guest stayed at our property situated in {actual_message['location']} 
-                and was so mesmerized by view that they can't resist themselves and stayed for a total of 
-                {date_difference} days.\n\n Whenever planning your next trip consider this as your first
-                priority.\n\n Refer to the property details for future reference :- 
-                {actual_message['propertyId']} \n {actual_message['location']}",
+                Message = (
+               f"One of our Guest stayed at our property situated in {actual_message['location']} "
+               f"and was so mesmerized by the view that they couldn't resist themselves and stayed for a total of "
+               f"{date_difference.days} days.\n"
+               f"Whenever planning your next trip, consider this as your first priority.\n"
+               f"Refer to the property details for future reference:\n "
+               f"Property ID: {actual_message['propertyId']}, "
+               f"Location: {actual_message['location']}"
+               )
                 MessageStructure = "text"
              )
           else:
